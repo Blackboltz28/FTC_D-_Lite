@@ -3,21 +3,23 @@ import java.util.*;
 public class DstarLite{
     private static Node[][] grid = new Node[10][10];
     
-    public static Node goal, start;
-    public static int goalX = 8, goalY = 8;
-    public static int startX = 1, startY = 1;
+    public static Node start;
+    public static final int goalX = 8, goalY = 8;
+    public static final int startX = 1, startY = 1;
 
     static{
         for(int y = 0; y < grid.length; ++y)
             for(int x = 0; x < grid[0].length; ++x)
-                grid[y][x] = new Node(x ,y);
+                grid[y][x] = new Node(x,y);
         
-        goal = grid[goalY][goalX];
+        
         start = grid[startY][startX];
     }
     public static void main(String[] args){
+        Node goal = grid[goalY][goalX];
         goal.setRHS(0.0);
         goal.setH(start.getEdgeCost(goal));
+        goal.key = goal.calculateKey();
 
         Node.km = 0.0;
         
@@ -25,20 +27,35 @@ public class DstarLite{
         U.add(goal);
         ArrayList<Node> path = new ArrayList<>();
 
-        Node u = null;
+        Node sLast = start;
 
         computeShortestPath(U);
+        while(start != goal){
+            // if(start.getRHS() == Double.POSITIVE_INFINITY) break;
+            path.add(start);
+            double minC = Double.POSITIVE_INFINITY;
+            Node minNode = null;
+            for(Node n : getNeighbors(start)){
+                double newC = start.getEdgeCost(n) + n.getG();
+                if(newC < minC){
+                    minNode = n;
+                    minC = newC;
+                }
+            }
 
-        while(u != goal){
-            if(start.getRHS() == Double.POSITIVE_INFINITY) break;
-            u = U.poll();
-            System.out.println("Once.");
-            path.add(u);
+            start = minNode;
         }
 
-        System.out.println("Done.");
         for(Node p : path)
-            System.out.println("(" + p.x + "," + p.y + ")");
+            System.out.println(p.x + "," + p.y);
+        // for(int y = 0; y < grid.length; ++y){
+        //     for(int x =0; x < grid[0].length; ++x){
+        //         if(grid[y][x].key[0] == Double.POSITIVE_INFINITY) System.out.print("I ");
+        //         else System.out.print(Math.round(grid[y][x].key[0]) + " ");
+        //     }
+        // System.out.println();
+        // }
+                
     }
 
     
@@ -46,11 +63,17 @@ public class DstarLite{
     public static void updateNode(Node u, PriorityQueue<Node> U){
         if(u.getG() != u.getRHS() && U.contains(u)){
             U.remove(u);
+            u.key = u.calculateKey();
             U.add(u);
             //might bring logic error if it can't recognize object once values are changed
         }
-        else if(u.getG() != u.getRHS() && !U.contains(u)) U.add(u);
-        else if(u.getG() == u.getRHS()) U.remove(u);    
+        else if(u.getG() != u.getRHS() && !U.contains(u)){
+            u.key = u.calculateKey();
+            U.add(u);
+        }
+        else if(u.getG() == u.getRHS() && U.contains(u)){
+            U.remove(u);   
+        }  
     }
 
     public static ArrayList<Node> getNeighbors(Node u){
@@ -67,15 +90,15 @@ public class DstarLite{
 
     public static void computeShortestPath(PriorityQueue<Node> U){
         NodeCompare comp = new NodeCompare();
-
-        while(comp.compare(U.peek(), start) == -1 || start.getRHS() > start.getG()){
+        while(!U.isEmpty() && ((comp.compare(U.peek(), start) < 0)|| start.getRHS() > start.getG())){
             Node u = U.peek();
-            System.out.println(u);
+            if(u.x == start.x && u.y == start.y) System.out.println("Start found.");
             double[] kOld = u.key;
             double[] kNew = u.calculateKey();
             
             if(kOld[0] < kNew[0] || kOld[1] < kNew[1]){
                 U.remove(u);
+                u.key = kNew;
                 U.add(u);
             }else if(u.getG() > u.getRHS()){
                 u.setG(u.getRHS());
@@ -101,15 +124,15 @@ public class DstarLite{
                     updateNode(n, U);
                 }
             }
-
+            start.key = start.calculateKey();
         }
     }
 
-    public static int find(Object o, Object[] arr){
-        for(int i = 0; i < arr.length; ++i){
-            if(arr[i] == o) return i;
-        }
+    // public static int find(Object o, Object[] arr){
+    //     for(int i = 0; i < arr.length; ++i){
+    //         if(arr[i] == o) return i;
+    //     }
 
-        return -1;
-    }
+    //     return -1;
+    // }
 }

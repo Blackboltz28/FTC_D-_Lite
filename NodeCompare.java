@@ -6,14 +6,9 @@ public class NodeCompare implements Comparator<Node>{
         n1.calculateKey();
         n2.calculateKey();
         
-        double n1f = n1.key[0];
-        double n2f = n2.key[0];
 
-        int n1i = (int) (n1f * 10.0);
-        int n2i = (int) (n2f * 10.0);
-
-        if(n1i == n2i)
+        if(Math.abs(n1.key[0] - n2.key[0]) < 0.01)
             return Double.compare(n1.key[1], n2.key[1]);
-        return Double.compare(n1f, n2f);
+        return Double.compare(n1.key[0], n2.key[0]);
     }
 }

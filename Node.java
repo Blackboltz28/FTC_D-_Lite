@@ -1,11 +1,11 @@
 
 
 public class Node{
-    private double g, rhs, f;
+    private double g, rhs;
     public double[] key;
     public int x, y;
     private boolean isBlocked;
-    private double h = 0.0;
+    private double h;
 
 
     public static double km = 0.0;
@@ -14,8 +14,8 @@ public class Node{
     public Node(int x, int y){
         g = Double.POSITIVE_INFINITY;
         rhs = Double.POSITIVE_INFINITY;
-        f = Double.POSITIVE_INFINITY;
-        key = new double[2];
+        h = 0.0;
+        key = this.calculateKey();
         this.x = x;
         this.y = y;
 
@@ -32,12 +32,8 @@ public class Node{
     
 
     public double getEdgeCost(Node n2){
-        if(isBlocked == true) return Double.POSITIVE_INFINITY;
-        return Math.sqrt(Math.pow((n2.x - x), 2.0) + Math.pow(n2.y - y, 2.0));
-    }
-
-    public double getFCost(){
-        return f;
+        if(isBlocked) return Double.POSITIVE_INFINITY;
+        return Math.sqrt(Math.pow(n2.x - x, 2.0) + Math.pow(n2.y - y, 2.0));
     }
 
     public void setG(double g){
@@ -63,7 +59,4 @@ public class Node{
     public double getH(){
         return h;
     }
-
-    
-
 }
