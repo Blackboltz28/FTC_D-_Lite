@@ -32,7 +32,7 @@ public class Node{
     
 
     public double getEdgeCost(Node n2){
-        if(isBlocked) return Double.POSITIVE_INFINITY;
+        if(isBlocked || n2.isBlocked()) return Double.POSITIVE_INFINITY;
         return Math.sqrt(Math.pow(n2.x - x, 2.0) + Math.pow(n2.y - y, 2.0));
     }
 
@@ -59,4 +59,10 @@ public class Node{
     public double getH(){
         return h;
     }
+
+    public void setBlocked(boolean b){
+        isBlocked = b;
+    }
+
+    public boolean isBlocked() {return isBlocked;}
 }

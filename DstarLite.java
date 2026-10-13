@@ -15,6 +15,7 @@ public class DstarLite{
         
         start = grid[startY][startX];
     }
+
     public static void main(String[] args){
         Node goal = grid[goalY][goalX];
         goal.setRHS(0.0);
@@ -22,14 +23,21 @@ public class DstarLite{
         goal.key = goal.calculateKey();
 
         Node.km = 0.0;
+        Node sLast = start;
+        int step = 0;
         
         PriorityQueue<Node> U = new PriorityQueue<>(new NodeCompare());
         U.add(goal);
         ArrayList<Node> path = new ArrayList<>();
 
-        Node sLast = start;
-
         computeShortestPath(U);
+        // for(int y = 0; y < grid.length; ++y){
+        //     for(int x =0; x < grid[0].length; ++x){
+        //         if(grid[y][x].key[0] == Double.POSITIVE_INFINITY) System.out.print("I ");
+        //         else System.out.print(Math.round(grid[y][x].key[0]) + " ");
+        //     }
+        // System.out.println();
+        // }
         while(start != goal){
             // if(start.getRHS() == Double.POSITIVE_INFINITY) break;
             path.add(start);
@@ -44,6 +52,37 @@ public class DstarLite{
             }
 
             start = minNode;
+            if(step == 3){
+                Node.km += sLast.getEdgeCost(start);
+                sLast = start;
+
+                Node obstacle1 = grid[5][5];
+                double cOld, c;
+                for(Node n : getNeighbors(obstacle1)){
+                    
+                    cOld = obstacle1.getEdgeCost(n);
+                    obstacle1.setBlocked(true);
+                    c = obstacle1.getEdgeCost(n);
+
+                    if(obstacle1 != goal){
+                        if(cOld > c) obstacle1.setRHS(Math.min(obstacle1.getRHS(), c + n.getG()));
+                        else if(obstacle1.getRHS() == cOld + n.getG()){
+                            double minRHS = Double.POSITIVE_INFINITY;
+                        for(Node s : getNeighbors(n)){
+                            double rhs = n.getEdgeCost(s) + s.getG();
+                            if(rhs < minRHS) minRHS = rhs;
+                        }
+                        n.setRHS(minRHS);
+                        }
+                    }
+                    updateNode(n, U);
+                }
+
+                computeShortestPath(U);
+            }
+        
+
+            step++;
         }
 
         for(Node p : path)
